@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindCare - Mental Health Support Platform</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card-hover {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="gradient-bg text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <i class="fas fa-heart text-2xl mr-3"></i>
+                    <span class="text-xl font-bold">MindCare</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="/assessment" class="hover:text-blue-200">Take Assessment</a>
+                    <a href="/dashboard" class="hover:text-blue-200">Dashboard</a>
+                    <button id="crisis-btn" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg font-semibold">
+                        Crisis Help
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="gradient-bg text-white py-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h1 class="text-5xl font-bold mb-6">Your Mental Health Matters</h1>
+            <p class="text-xl mb-8 max-w-3xl mx-auto">
+                Take control of your mental wellness with our comprehensive assessment tools, 
+                personalized insights, and 24/7 AI support through WhatsApp.
+            </p>
+            <div class="space-x-4">
+                <a href="/assessment" class="bg-white text-purple-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition">
+                    Start Free Assessment
+                </a>
+                <button onclick="scrollToFeatures()" class="border-2 border-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-purple-600 transition">
+                    Learn More
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold text-gray-900 mb-4">Comprehensive Mental Health Support</h2>
+                <p class="text-xl text-gray-600">Evidence-based tools and AI-powered insights for your wellbeing</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Professional Assessments -->
+                <div class="bg-white p-8 rounded-xl shadow-lg card-hover">
+                    <div class="text-blue-600 text-4xl mb-4">
+                        <i class="fas fa-clipboard-list"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4">Professional Assessments</h3>
+                    <p class="text-gray-600 mb-6">
+                        Standardized PHQ-9 and GAD-7 assessments used by healthcare professionals worldwide
+                        to evaluate depression and anxiety levels.
+                    </p>
+                    <ul class="text-sm text-gray-500 space-y-2">
+                        <li>✓ PHQ-9 Depression Screening</li>
+                        <li>✓ GAD-7 Anxiety Assessment</li>
+                        <li>✓ Sentiment Analysis</li>
+                        <li>✓ Risk Level Evaluation</li>
+                    </ul>
+                </div>
+
+                <!-- AI-Powered Analysis -->
+                <div class="bg-white p-8 rounded-xl shadow-lg card-hover">
+                    <div class="text-green-600 text-4xl mb-4">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4">AI-Powered Analysis</h3>
+                    <p class="text-gray-600 mb-6">
+                        Advanced AI analyzes your responses and text input to provide personalized insights
+                        and recommendations for your mental health journey.
+                    </p>
+                    <ul class="text-sm text-gray-500 space-y-2">
+                        <li>✓ Personalized Recommendations</li>
+                        <li>✓ Progress Tracking</li>
+                        <li>✓ Risk Assessment</li>
+                        <li>✓ Trend Analysis</li>
+                    </ul>
+                </div>
+
+                <!-- 24/7 WhatsApp Support -->
+                <div class="bg-white p-8 rounded-xl shadow-lg card-hover">
+                    <div class="text-purple-600 text-4xl mb-4">
+                        <i class="fab fa-whatsapp"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4">24/7 WhatsApp Support</h3>
+                    <p class="text-gray-600 mb-6">
+                        Connect with our empathetic AI chatbot "Empathibot" anytime via WhatsApp
+                        for immediate support and guidance.
+                    </p>
+                    <ul class="text-sm text-gray-500 space-y-2">
+                        <li>✓ 24/7 Availability</li>
+                        <li>✓ Empathetic Responses</li>
+                        <li>✓ Crisis Detection</li>
+                        <li>✓ Resource Sharing</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Registration Section -->
+    <section class="bg-gray-100 py-20">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="bg-white rounded-xl shadow-lg p-8">
+                <h2 class="text-3xl font-bold text-center mb-8">Start Your Mental Health Journey</h2>
+                <form id="registration-form" class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                        <input type="text" id="name" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+                        <input type="email" id="email" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Age</label>
+                        <input type="number" id="age" min="13" max="120" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                    </div>
+                    <div class="flex items-end">
+                        <button type="submit" class="w-full gradient-bg text-white py-3 rounded-lg font-semibold hover:opacity-90 transition">
+                            Create Account & Start Assessment
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Crisis Resources Modal -->
+    <div id="crisis-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-xl max-w-2xl w-full p-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-red-600">Crisis Resources</h2>
+                    <button id="close-modal" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <div class="space-y-6">
+                    <div>
+                        <h3 class="text-lg font-semibold mb-4 text-red-600">Immediate Help</h3>
+                        <div id="immediate-help" class="space-y-3">
+                            <!-- Crisis resources will be loaded here -->
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h3 class="text-lg font-semibold mb-4">Mental Health Resources</h3>
+                        <div id="mental-health-resources" class="space-y-3">
+                            <!-- Resources will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-8 p-4 bg-yellow-50 rounded-lg border-l-4 border-yellow-400">
+                    <p class="text-sm text-yellow-800">
+                        <strong>Important:</strong> If you're experiencing a mental health emergency, 
+                        please call 911 or go to your nearest emergency room immediately.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Registration form handler
+        document.getElementById('registration-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                age: parseInt(document.getElementById('age').value)
+            };
+            
+            try {
+                const response = await fetch('/api/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('Registration successful! Redirecting to assessment...');
+                    window.location.href = '/assessment';
+                } else {
+                    alert('Registration failed: ' + result.error);
+                }
+            } catch (error) {
+                alert('Registration failed: ' + error.message);
+            }
+        });
+
+        // Crisis resources modal
+        document.getElementById('crisis-btn').addEventListener('click', async function() {
+            document.getElementById('crisis-modal').classList.remove('hidden');
+            
+            try {
+                const response = await fetch('/api/crisis-resources');
+                const resources = await response.json();
+                
+                // Populate immediate help
+                const immediateHelp = document.getElementById('immediate-help');
+                immediateHelp.innerHTML = resources.immediate_help.map(resource => `
+                    <div class="bg-red-50 p-4 rounded-lg border-l-4 border-red-400">
+                        <h4 class="font-semibold">${resource.name}</h4>
+                        <p class="text-sm text-gray-600">${resource.description}</p>
+                        ${resource.phone ? `<p class="font-bold text-red-600">Call: ${resource.phone}</p>` : ''}
+                        ${resource.text ? `<p class="font-bold text-red-600">Text: ${resource.text}</p>` : ''}
+                    </div>
+                `).join('');
+                
+                // Populate mental health resources
+                const mentalHealthResources = document.getElementById('mental-health-resources');
+                mentalHealthResources.innerHTML = resources.mental_health_resources.map(resource => `
+                    <div class="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-400">
+                        <h4 class="font-semibold">${resource.name}</h4>
+                        <p class="text-sm text-gray-600">${resource.description}</p>
+                        ${resource.phone ? `<p class="font-bold text-blue-600">Call: ${resource.phone}</p>` : ''}
+                        ${resource.website ? `<p class="font-bold text-blue-600">Visit: <a href="${resource.website}" target="_blank" class="underline">${resource.website}</a></p>` : ''}
+                    </div>
+                `).join('');
+                
+            } catch (error) {
+                console.error('Failed to load crisis resources:', error);
+            }
+        });
+
+        document.getElementById('close-modal').addEventListener('click', function() {
+            document.getElementById('crisis-modal').classList.add('hidden');
+        });
+
+        function scrollToFeatures() {
+            document.getElementById('features').scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>

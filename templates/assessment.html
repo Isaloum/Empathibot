@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mental Health Assessment - MindCare</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .progress-bar {
+            transition: width 0.3s ease;
+        }
+        .question-card {
+            transition: all 0.3s ease;
+        }
+        .question-card.active {
+            transform: scale(1.02);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="gradient-bg text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="/" class="flex items-center">
+                        <i class="fas fa-heart text-2xl mr-3"></i>
+                        <span class="text-xl font-bold">MindCare</span>
+                    </a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="/" class="hover:text-blue-200">Home</a>
+                    <a href="/dashboard" class="hover:text-blue-200">Dashboard</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Progress Bar -->
+    <div class="bg-white shadow-sm">
+        <div class="max-w-4xl mx-auto px-4 py-4">
+            <div class="flex justify-between items-center mb-2">
+                <span class="text-sm font-medium text-gray-700">Assessment Progress</span>
+                <span id="progress-text" class="text-sm font-medium text-gray-700">0%</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2">
+                <div id="progress-bar" class="progress-bar bg-purple-600 h-2 rounded-full" style="width: 0%"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Assessment Container -->
+    <div class="max-w-4xl mx-auto px-4 py-8">
+        <!-- Welcome Section -->
+        <div id="welcome-section" class="bg-white rounded-xl shadow-lg p-8 mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 mb-4">Mental Health Assessment</h1>
+            <p class="text-lg text-gray-600 mb-6">
+                This comprehensive assessment uses standardized tools (PHQ-9 and GAD-7) to evaluate your mental health. 
+                Your responses are confidential and will help provide personalized recommendations.
+            </p>
+            
+            <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-info-circle text-blue-400"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-blue-700">
+                            <strong>Important:</strong> This assessment is for informational purposes only and does not replace professional medical advice. 
+                            If you're experiencing a mental health crisis, please seek immediate help.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <button id="start-assessment" class="gradient-bg text-white px-8 py-3 rounded-lg font-semibold hover:opacity-90 transition">
+                Start Assessment
+            </button>
+        </div>
+
+        <!-- PHQ-9 Section -->
+        <div id="phq9-section" class="hidden">
+            <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">Depression Assessment (PHQ-9)</h2>
+                <p class="text-gray-600 mb-6">
+                    Over the last 2 weeks, how often have you been bothered by any of the following problems?
+                </p>
+                
+                <div id="phq9-questions" class="space-y-6">
+                    <!-- Questions will be populated here -->
+                </div>
+                
+                <button id="phq9-next" class="mt-6 gradient-bg text-white px-8 py-3 rounded-lg font-semibold hover:opacity-90 transition disabled:opacity-50" disabled>
+                    Continue to Anxiety Assessment
+                </button>
+            </div>
+        </div>
+
+        <!-- GAD-7 Section -->
+        <div id="gad7-section" class="hidden">
+            <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">Anxiety Assessment (GAD-7)</h2>
+                <p class="text-gray-600 mb-6">
+                    Over the last 2 weeks, how often have you been bothered by the following problems?
+                </p>
+                
+                <div id="gad7-questions" class="space-y-6">
+                    <!-- Questions will be populated here -->
+                </div>
+                
+                <button id="gad7-next" class="mt-6 gradient-bg text-white px-8 py-3 rounded-lg font-semibold hover:opacity-90 transition disabled:opacity-50" disabled>
+                    Continue to Text Analysis
+                </button>
+            </div>
+        </div>
+
+        <!-- Text Input Section -->
+        <div id="text-section" class="hidden">
+            <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">Share Your Thoughts</h2>
+                <p class="text-gray-600 mb-6">
+                    Please share how you've been feeling lately. This helps our AI provide more personalized recommendations.
+                </p>
+                
+                <textarea id="text-input" 
+                    class="w-full h-32 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" 
+                    placeholder="Tell us about your current state of mind, any challenges you're facing, or how you've been feeling..."></textarea>
+                
+                <button id="submit-assessment" class="mt-6 gradient-bg text-white px-8 py-3 rounded-lg font-semibold hover:opacity-90 transition">
+                    Complete Assessment
+                </button>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="results-section" class="hidden">
+            <div class="bg-white rounded-xl shadow-lg p-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">Your Assessment Results</h2>
+                
+                <!-- Results will be populated here -->
+                <div id="results-content">
+                    <!-- Loading spinner -->
+                    <div class="flex justify-center items-center py-8">
+                        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class AssessmentApp {
+            constructor() {
+                this.currentSection = 'welcome';
+                this.phq9Scores = [];
+                this.gad7Scores = [];
+                this.textInput = '';
+                this.totalQuestions = 18; // 9 PHQ-9 + 7 GAD-7 + 2 sections
+                this.completedQuestions = 0;
+                
+                this.phq9Questions = [
+                    "Little interest or pleasure in doing things",
+                    "Feeling down, depressed, or hopeless",
+                    "Trouble falling or staying asleep, or sleeping too much",
+                    "Feeling tired or having little energy",
+                    "Poor appetite or overeating",
+                    "Feeling bad about yourself or that you are a failure",
+                    "Trouble concentrating on things",
+                    "Moving or speaking slowly, or being fidgety/restless",
+                    "Thoughts that you would be better off dead or hurting yourself"
+                ];
+                
+                this.gad7Questions = [
+                    "Feeling nervous, anxious, or on edge",
+                    "Not being able to stop or control worrying",
+                    "Worrying too much about different things",
+                    "Trouble relaxing",
+                    "Being so restless that it is hard to sit still",
+                    "Becoming easily annoyed or irritable",
+                    "Feeling afraid as if something awful might happen"
+                ];
+                
+                this.scaleOptions = [
+                    { value: 0, label: "Not at all" },
+                    { value: 1, label: "Several days" },
+                    { value: 2, label: "More than half the days" },
+                    { value: 3, label: "Nearly every day" }
+                ];
+                
+                this.initializeEventListeners();
+            }
+            
+            initializeEventListeners() {
+                document.getElementById('start-assessment').addEventListener('click', () => this.startAssessment());
+                document.getElementById('phq9-next').addEventListener('click', () => this.showGAD7Section());
+                document.getElementById('gad7-next').addEventListener('click', () => this.showTextSection());
+                document.getElementById('submit-assessment').addEventListener('click', () => this.submitAssessment());
+            }
+            
+            updateProgress() {
+                const progress = Math.round((this.completedQuestions / this.totalQuestions) * 100);
+                document.getElementById('progress-bar').style.width = progress + '%';
+                document.getElementById('progress-text').textContent = progress + '%';
+            }
+            
+            startAssessment() {
+                document.getElementById('welcome-section').classList.add('hidden');
+                document.getElementById('phq9-section').classList.remove('hidden');
+                this.renderPHQ9Questions();
+                this.completedQuestions = 1;
+                this.updateProgress();
+            }
+            
+            renderPHQ9Questions() {
+                const container = document.getElementById('phq9-questions');
+                container.innerHTML = this.phq9Questions.map((question, index) => `
+                    <div class="question-card bg-gray-50 p-6 rounded-lg">
+                        <h3 class="font-semibold mb-4">${index + 1}. ${question}</h3>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            ${this.scaleOptions.map(option => `
+                                <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-white transition">
+                                    <input type="radio" name="phq9-${index}" value="${option.value}" class="mr-2 text-purple-600 focus:ring-purple-500">
+                                    <span class="text-sm">${option.label}</span>
+                                </label>
+                            `).join('')}
+                        </div>
+                    </div>
+                `).join('');
+                
+                // Add event listeners to radio buttons
+                container.addEventListener('change', () => this.checkPHQ9Completion());
+            }
+            
+            checkPHQ9Completion() {
+                const allAnswered = this.phq9Questions.every((_, index) => {
+                    return document.querySelector(`input[name="phq9-${index}"]:checked`);
+                });
+                
+                document.getElementById('phq9-next').disabled = !allAnswered;
+                
+                if (allAnswered) {
+                    this.phq9Scores = this.phq9Questions.map((_, index) => {
+                        const checked = document.querySelector(`input[name="phq9-${index}"]:checked`);
+                        return parseInt(checked.value);
+                    });
+                    this.completedQuestions = 10; // 1 welcome + 9 questions
+                    this.updateProgress();
+                }
+            }
+            
+            showGAD7Section() {
+                document.getElementById('phq9-section').classList.add('hidden');
+                document.getElementById('gad7-section').classList.remove('hidden');
+                this.renderGAD7Questions();
+            }
+            
+            renderGAD7Questions() {
+                const container = document.getElementById('gad7-questions');
+                container.innerHTML = this.gad7Questions.map((question, index) => `
+                    <div class="question-card bg-gray-50 p-6 rounded-lg">
+                        <h3 class="font-semibold mb-4">${index + 1}. ${question}</h3>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            ${this.scaleOptions.map(option => `
+                                <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-white transition">
+                                    <input type="radio" name="gad7-${index}" value="${option.value}" class="mr-2 text-purple-600 focus:ring-purple-500">
+                                    <span class="text-sm">${option.label}</span>
+                                </label>
+                            `).join('')}
+                        </div>
+                    </div>
+                `).join('');
+                
+                // Add event listeners to radio buttons
+                container.addEventListener('change', () => this.checkGAD7Completion());
+            }
+            
+            checkGAD7Completion() {
+                const allAnswered = this.gad7Questions.every((_, index) => {
+                    return document.querySelector(`input[name="gad7-${index}"]:checked`);
+                });
+                
+                document.getElementById('gad7-next').disabled = !allAnswered;
+                
+                if (allAnswered) {
+                    this.gad7Scores = this.gad7Questions.map((_, index) => {
+                        const checked = document.querySelector(`input[name="gad7-${index}"]:checked`);
+                        return parseInt(checked.value);
+                    });
+                    this.completedQuestions = 17; // 1 welcome + 9 PHQ-9 + 7 GAD-7
+                    this.updateProgress();
+                }
+            }
+            
+            showTextSection() {
+                document.getElementById('gad7-section').classList.add('hidden');
+                document.getElementById('text-section').classList.remove('hidden');
+                this.completedQuestions = 18;
+                this.updateProgress();
+            }
+            
+            async submitAssessment() {
+                this.textInput = document.getElementById('text-input').value;
+                
+                const assessmentData = {
+                    phq9_scores: this.phq9Scores,
+                    gad7_scores: this.gad7Scores,
+                    text_input: this.textInput
+                };
+                
+                try {
+                    document.getElementById('text-section').classList.add('hidden');
+                    document.getElementById('results-section').classList.remove('hidden');
+                    
+                    const response = await fetch('/api/analyze', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(assessmentData)
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        this.displayResults(result.analysis);
+                    } else {
+                        throw new Error(result.error);
+                    }
+                } catch (error) {
+                    console.error('Assessment submission failed:', error);
+                    document.getElementById('results-content').innerHTML = `
+                        <div class="bg-red-50 border-l-4 border-red-400 p-4">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-exclamation-triangle text-red-400"></i>
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-sm text-red-700">
+                                        <strong>Error:</strong> Failed to process assessment. Please try again.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+            
+            displayResults(analysis) {
+                const riskLevelColors = {
+                    low: 'green',
+                    moderate: 'yellow',
+                    high: 'red'
+                };
+                
+                const riskColor = riskLevelColors[analysis.risk_level];
+                
+                document.getElementById('results-content').innerHTML = `
+                    <!-- Risk Level -->
+                    <div class="mb-8 p-6 bg-${riskColor}-50 border-l-4 border-${riskColor}-400 rounded-lg">
+                        <h3 class="text-lg font-semibold text-${riskColor}-800 mb-2">
+                            Overall Risk Level: ${analysis.risk_level.charAt(0).toUpperCase() + analysis.risk_level.slice(1)}
+                        </h3>
+                        <p class="text-${riskColor}-700">
+                            ${this.getRiskLevelDescription(analysis.risk_level)}
+                        </p>
+                    </div>
+                    
+                    <!-- Assessment Results -->
+                    <div class="grid md:grid-cols-2 gap-6 mb-8">
+                        <!-- Depression Results -->
+                        <div class="bg-blue-50 p-6 rounded-lg">
+                            <h3 class="text-lg font-semibold text-blue-800 mb-4">
+                                <i class="fas fa-chart-line mr-2"></i>Depression Assessment (PHQ-9)
+                            </h3>
+                            <div class="space-y-2">
+                                <p><strong>Score:</strong> ${analysis.phq9.total}/27</p>
+                                <p><strong>Level:</strong> ${analysis.phq9.result.description}</p>
+                                <div class="w-full bg-blue-200 rounded-full h-2 mt-3">
+                                    <div class="bg-blue-600 h-2 rounded-full" style="width: ${(analysis.phq9.total/27)*100}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Anxiety Results -->
+                        <div class="bg-purple-50 p-6 rounded-lg">
+                            <h3 class="text-lg font-semibold text-purple-800 mb-4">
+                                <i class="fas fa-heart-pulse mr-2"></i>Anxiety Assessment (GAD-7)
+                            </h3>
+                            <div class="space-y-2">
+                                <p><strong>Score:</strong> ${analysis.gad7.total}/21</p>
+                                <p><strong>Level:</strong> ${analysis.gad7.result.description}</p>
+                                <div class="w-full bg-purple-200 rounded-full h-2 mt-3">
+                                    <div class="bg-purple-600 h-2 rounded-full" style="width: ${(analysis.gad7.total/21)*100}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    ${analysis.sentiment_analysis ? `
+                    <!-- Sentiment Analysis -->
+                    <div class="mb-8 p-6 bg-gray-50 rounded-lg">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                            <i class="fas fa-comment-dots mr-2"></i>Text Analysis
+                        </h3>
+                        <p><strong>Sentiment:</strong> ${analysis.sentiment_analysis.sentiment.charAt(0).toUpperCase() + analysis.sentiment_analysis.sentiment.slice(1)}</p>
+                        <p><strong>Confidence:</strong> ${Math.round(analysis.sentiment_analysis.confidence * 100)}%</p>
+                    </div>
+                    ` : ''}
+                    
+                    <!-- Recommendations -->
+                    <div class="mb-8">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                            <i class="fas fa-lightbulb mr-2"></i>Personalized Recommendations
+                        </h3>
+                        <div class="space-y-3">
+                            ${analysis.recommendations.map(rec => `
+                                <div class="flex items-start p-4 bg-green-50 rounded-lg">
+                                    <i class="fas fa-check-circle text-green-500 mr-3 mt-1"></i>
+                                    <p class="text-green-800">${rec}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    
+                    <!-- Next Steps -->
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <a href="/dashboard" class="flex-1 gradient-bg text-white text-center py-3 px-6 rounded-lg font-semibold hover:opacity-90 transition">
+                            View Dashboard
+                        </a>
+                        <button onclick="window.print()" class="flex-1 border-2 border-purple-600 text-purple-600 text-center py-3 px-6 rounded-lg font-semibold hover:bg-purple-50 transition">
+                            Save Results
+                        </button>
+                        <a href="/assessment" class="flex-1 border-2 border-gray-300 text-gray-700 text-center py-3 px-6 rounded-lg font-semibold hover:bg-gray-50 transition">
+                            Retake Assessment
+                        </a>
+                    </div>
+                `;
+            }
+            
+            getRiskLevelDescription(level) {
+                const descriptions = {
+                    low: 'Your assessment indicates minimal mental health concerns. Continue maintaining healthy habits and stay aware of your mental wellness.',
+                    moderate: 'Your assessment suggests some mental health concerns that may benefit from attention. Consider speaking with a mental health professional.',
+                    high: 'Your assessment indicates significant mental health concerns. We strongly recommend seeking professional help from a qualified mental health provider.'
+                };
+                return descriptions[level];
+            }
+        }
+        
+        // Initialize the assessment app
+        new AssessmentApp();
+    </script>
+</body>
+</html>
