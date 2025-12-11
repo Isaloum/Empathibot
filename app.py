@@ -16,6 +16,10 @@ import re
 import uuid
 from werkzeug.security import generate_password_hash, check_password_hash
 
+# Import enhanced Empathibot and Scheduler
+from empathibot import Empathibot, CrisisDetector, LanguageHandler, UserSessionManager
+from scheduler import CheckInScheduler
+
 load_dotenv()
 
 # Firebase setup
@@ -25,7 +29,7 @@ firebase_admin.initialize_app(cred)
 db = firestore.client()
 
 # LLM setup
-llm = OpenAI(temperature=0.7)
+llm = OpenAI(temperature=0.7, max_tokens=250)
 
 app = Flask(__name__)
 CORS(app)
@@ -133,6 +137,15 @@ class MentalHealthAnalyzer:
         return recommendations
 
 analyzer = MentalHealthAnalyzer()
+
+# Initialize enhanced Empathibot
+empathibot = Empathibot(db=db, llm=llm)
+
+# Initialize automated check-in scheduler
+scheduler = CheckInScheduler(db=db, empathibot=empathibot)
+
+# Start the scheduler in background (optional - uncomment to enable)
+# scheduler.start_scheduler()
 
 # Web Interface Routes
 @app.route("/")
@@ -265,50 +278,202 @@ def get_crisis_resources():
     return jsonify(resources)
 
 @app.route("/whatsapp", methods=["POST"])
+@limiter.limit("30 per minute")
 def whatsapp_reply():
+    """Enhanced WhatsApp endpoint with advanced Empathibot"""
     try:
         incoming_msg = request.form.get("Body", "").strip()
         sender = request.form.get("From", "")
 
-        # Enhanced response with mental health awareness
-        sentiment = analyzer.analyze_text_sentiment(incoming_msg)
-        
-        if sentiment["sentiment"] == "negative" and sentiment["confidence"] > 0.7:
-            prompt = f"Respond empathetically to this message with mental health awareness: {incoming_msg}. The person seems to be struggling. Provide supportive, caring response and suggest professional help if appropriate."
-        else:
-            prompt = f"Respond empathetically to this message: {incoming_msg}"
-        
-        response = llm.invoke(prompt)
+        print(f"📱 Received from {sender}: {incoming_msg}")
 
-        # Save enhanced context to Firestore
-        db.collection("messages").add({
-            "text": incoming_msg,
-            "response": str(response),
-            "sender": sender,
-            "sentiment_analysis": sentiment,
-            "timestamp": firestore.SERVER_TIMESTAMP
-        })
+        # Process message through enhanced Empathibot
+        bot_response = empathibot.process_message(
+            phone_number=sender,
+            message=incoming_msg
+        )
 
-        print(f"User ({sender}): {incoming_msg}")
-        print(f"Sentiment: {sentiment}")
-        print(f"Empathibot: {response}")
+        print(f"🤖 Empathibot response: {bot_response}")
 
+        # Send response via Twilio
         twilio_response = MessagingResponse()
-        twilio_response.message(str(response))
+        twilio_response.message(bot_response)
         return str(twilio_response)
 
     except Exception as e:
+        # Log error to Firestore
         db.collection("errors").add({
             "error": str(e),
+            "error_type": type(e).__name__,
+            "endpoint": "/whatsapp",
+            "sender": sender if 'sender' in locals() else "unknown",
+            "message": incoming_msg if 'incoming_msg' in locals() else "unknown",
             "timestamp": firestore.SERVER_TIMESTAMP
         })
-        print(f"[ERROR] {e}")
-        return "Internal server error", 500
+        print(f"❌ [ERROR] {e}")
+
+        # Send friendly error message to user
+        error_response = MessagingResponse()
+        error_response.message("I'm having a moment of difficulty. Please try again in a moment. If you're in crisis, please call 988 immediately. 💙")
+        return str(error_response)
+
+# Enhanced Empathibot API Endpoints
+@app.route("/api/empathibot/user/<phone_number>/insights", methods=["GET"])
+@limiter.limit("10 per minute")
+def get_user_insights(phone_number):
+    """Get analytics and insights for a WhatsApp user"""
+    try:
+        # Get user from phone number
+        users_ref = db.collection('whatsapp_users')
+        query = users_ref.where('phone_number', '==', phone_number).limit(1)
+        users = list(query.stream())
+
+        if not users:
+            return jsonify({"success": False, "error": "User not found"}), 404
+
+        user_id = users[0].id
+        insights = empathibot.get_user_insights(user_id)
+
+        return jsonify({"success": True, "insights": insights})
+
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+@app.route("/api/empathibot/check-in/<phone_number>", methods=["POST"])
+@limiter.limit("5 per hour")
+def send_check_in(phone_number):
+    """Send a wellness check-in to a user"""
+    try:
+        # Get user from phone number
+        users_ref = db.collection('whatsapp_users')
+        query = users_ref.where('phone_number', '==', phone_number).limit(1)
+        users = list(query.stream())
+
+        if not users:
+            return jsonify({"success": False, "error": "User not found"}), 404
+
+        user_id = users[0].id
+        check_in_message = empathibot.send_check_in(user_id)
+
+        # TODO: Send via Twilio (requires Twilio client setup)
+        # For now, just return the message
+
+        return jsonify({
+            "success": True,
+            "message": check_in_message,
+            "note": "Check-in message generated. Integrate with Twilio to send."
+        })
+
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+@app.route("/api/empathibot/crisis-alerts", methods=["GET"])
+@limiter.limit("10 per minute")
+def get_crisis_alerts():
+    """Get recent crisis alerts for monitoring"""
+    try:
+        # Get recent crisis alerts (last 24 hours)
+        alerts_ref = db.collection('crisis_alerts')
+        alerts = alerts_ref.order_by('timestamp', direction=firestore.Query.DESCENDING).limit(50).stream()
+
+        alert_list = []
+        for alert in alerts:
+            alert_data = alert.to_dict()
+            alert_list.append({
+                'id': alert.id,
+                'user_id': alert_data.get('user_id'),
+                'phone_number': alert_data.get('phone_number'),
+                'severity': alert_data.get('severity'),
+                'severity_score': alert_data.get('severity_score'),
+                'matched_keywords': alert_data.get('matched_keywords'),
+                'timestamp': alert_data.get('timestamp')
+            })
+
+        return jsonify({"success": True, "alerts": alert_list, "count": len(alert_list)})
+
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+@app.route("/api/empathibot/conversation/<phone_number>", methods=["GET"])
+@limiter.limit("10 per minute")
+def get_conversation_history(phone_number):
+    """Get conversation history for a user"""
+    try:
+        # Get user from phone number
+        users_ref = db.collection('whatsapp_users')
+        query = users_ref.where('phone_number', '==', phone_number).limit(1)
+        users = list(query.stream())
+
+        if not users:
+            return jsonify({"success": False, "error": "User not found"}), 404
+
+        user_id = users[0].id
+
+        # Get conversation history
+        limit = request.args.get('limit', 20, type=int)
+        messages_ref = db.collection('whatsapp_messages')
+        query = messages_ref.where('user_id', '==', user_id).order_by('timestamp', direction=firestore.Query.DESCENDING).limit(limit)
+
+        messages = []
+        for msg in query.stream():
+            msg_data = msg.to_dict()
+            messages.append({
+                'user_message': msg_data.get('user_message'),
+                'bot_response': msg_data.get('bot_response'),
+                'sentiment': msg_data.get('sentiment'),
+                'crisis_info': msg_data.get('crisis_info'),
+                'language': msg_data.get('language'),
+                'timestamp': msg_data.get('timestamp')
+            })
+
+        return jsonify({
+            "success": True,
+            "messages": list(reversed(messages)),  # Chronological order
+            "count": len(messages)
+        })
+
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+@app.route("/api/empathibot/stats", methods=["GET"])
+def get_empathibot_stats():
+    """Get overall Empathibot statistics"""
+    try:
+        # Total users
+        users_count = len(list(db.collection('whatsapp_users').stream()))
+
+        # Total conversations
+        messages_count = len(list(db.collection('whatsapp_messages').limit(1000).stream()))
+
+        # Total crisis alerts
+        crisis_count = len(list(db.collection('crisis_alerts').stream()))
+
+        # Active users (last 7 days)
+        # Note: This is a simplified version, would need better indexing for production
+        active_users = 0  # Placeholder
+
+        stats = {
+            "total_users": users_count,
+            "total_conversations": messages_count,
+            "total_crisis_alerts": crisis_count,
+            "active_users_7d": active_users,
+            "system_status": "operational"
+        }
+
+        return jsonify({"success": True, "stats": stats})
+
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
 
 # ✅ Health check route
 @app.route("/health", methods=["GET"])
 def health():
-    return "Empathibot is alive!", 200
+    return "Empathibot is alive! 🤖💙", 200
 
 # ✅ Required for Render
 if __name__ == "__main__":

@@ -1,3 +1,13 @@
-24-04-2025.txt 
+24-04-2025.txt
 firebase_config.json
-
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.env
