@@ -16,11 +16,15 @@ A comprehensive mental health support application that combines professional ass
 - **Intelligent Insights**: Advanced algorithms analyze patterns and provide actionable advice
 - **Crisis Detection**: Automatic identification of high-risk situations
 
-### 💬 24/7 WhatsApp Support
-- **Empathibot**: Empathetic AI chatbot available around the clock
-- **Instant Support**: Immediate responses to mental health concerns
-- **Crisis Intervention**: Automatic detection and response to crisis situations
-- **Resource Sharing**: Access to mental health resources and emergency contacts
+### 💬 24/7 Enhanced WhatsApp Support (Empathibot)
+- **Advanced Conversational AI**: Context-aware responses with conversation memory
+- **Multi-tier Crisis Detection**: Automatic severity scoring (critical, high, moderate, low)
+- **Multilingual Support**: Automatic language detection and responses in 10+ languages
+- **Personalized Interactions**: User profiles with mental health history tracking
+- **Intelligent Sentiment Analysis**: Real-time emotion detection and response adaptation
+- **Crisis Resources**: Immediate delivery of location-specific emergency contacts
+- **Automated Check-ins**: Scheduled wellness monitoring and follow-ups
+- **Crisis Follow-ups**: Automatic follow-up after high-severity conversations
 
 ### 📊 Interactive Dashboard
 - **Visual Progress Tracking**: Charts and graphs showing mental health trends
@@ -165,6 +169,62 @@ The application provides immediate access to crisis resources:
 - **National Alliance on Mental Illness**: https://nami.org
 - **Mental Health America**: https://mhanational.org
 
+## 🤖 Enhanced Empathibot Features
+
+### Advanced Crisis Detection System
+The Empathibot uses a sophisticated multi-tier crisis detection system:
+
+**Crisis Severity Levels:**
+- **Critical (100+ points)**: Contains keywords like "suicide", "kill myself", "end my life"
+  - Immediate crisis intervention with emergency hotline numbers
+  - Automatic alert logging for monitoring
+  - Scheduled follow-up within 4 hours
+
+- **High (50-99 points)**: Phrases like "self harm", "hopeless", "worthless"
+  - Supportive crisis response with resources
+  - Crisis alert logged
+  - Follow-up scheduled
+
+- **Moderate (20-49 points)**: Keywords like "depressed", "anxious", "overwhelmed"
+  - Empathetic support with coping suggestions
+  - Gentle resource recommendations
+
+- **Low (<20 points)**: Normal conversation
+  - Standard empathetic AI responses
+  - No crisis intervention needed
+
+### Multilingual Capabilities
+Empathibot automatically detects and responds in 10+ languages:
+- English, Spanish, French, German, Italian
+- Portuguese, Chinese, Japanese, Arabic, Hindi
+- Crisis resources provided in detected language
+- Seamless language switching mid-conversation
+
+### Conversation Memory & Context
+- Remembers last 5 message exchanges
+- Maintains user context across sessions
+- Personalizes responses based on history
+- Tracks mood trends over time
+
+### Automated Wellness System
+**Daily Check-ins** (10:00 AM):
+- Personalized wellness messages
+- Customized to user's name and history
+- Only sent if 24+ hours since last interaction
+
+**Crisis Follow-ups** (Every 4 hours):
+- Automatic follow-up after crisis alerts
+- Severity-based messaging
+- Ensures ongoing support
+
+### User Session Management
+Each WhatsApp user gets:
+- Unique profile with conversation history
+- Mental health risk assessment
+- Mood trend tracking
+- Conversation analytics
+- Personalized insights
+
 ## 🔧 API Endpoints
 
 ### User Management
@@ -176,8 +236,15 @@ The application provides immediate access to crisis resources:
 - `GET /api/crisis-resources` - Get crisis support resources
 
 ### WhatsApp Integration
-- `POST /whatsapp` - Webhook for WhatsApp messages
+- `POST /whatsapp` - Webhook for WhatsApp messages (Enhanced with Empathibot)
 - `GET /health` - Health check endpoint
+
+### Enhanced Empathibot Endpoints
+- `GET /api/empathibot/user/<phone_number>/insights` - Get user analytics and insights
+- `POST /api/empathibot/check-in/<phone_number>` - Trigger wellness check-in
+- `GET /api/empathibot/crisis-alerts` - Get recent crisis alerts (monitoring)
+- `GET /api/empathibot/conversation/<phone_number>` - Get conversation history
+- `GET /api/empathibot/stats` - Get overall system statistics
 
 ## 🤝 Contributing
 
@@ -213,22 +280,34 @@ For technical support or questions about the application:
 
 ## 🎯 Roadmap
 
+### ✅ Recently Completed
+- [x] **Enhanced Empathibot with Advanced AI** - Multi-tier crisis detection, conversation memory
+- [x] **Multilingual Support** - Automatic language detection for 10+ languages
+- [x] **Automated Check-in System** - Scheduled wellness monitoring
+- [x] **Crisis Follow-up System** - Automatic follow-up after high-risk conversations
+- [x] **User Session Management** - Comprehensive user profiles and analytics
+- [x] **Advanced Analytics API** - Insights, conversation history, crisis monitoring
+
 ### Upcoming Features
 - [ ] Mobile app (iOS/Android)
 - [ ] Integration with wearable devices
-- [ ] Machine learning-based mood prediction
-- [ ] Therapist matching and booking
-- [ ] Group support features
-- [ ] Multilingual support
-- [ ] Advanced analytics and reporting
+- [ ] Machine learning-based mood prediction models
+- [ ] Therapist matching and booking system
+- [ ] Group support features and peer connections
+- [ ] Voice message support in WhatsApp
+- [ ] Integration with assessment system (link WhatsApp users to web assessments)
+- [ ] Admin dashboard for crisis monitoring
+- [ ] SMS fallback for non-WhatsApp users
 
 ### Long-term Goals
 - [ ] Clinical validation studies
-- [ ] Healthcare provider integration
+- [ ] Healthcare provider integration (HIPAA-compliant data sharing)
 - [ ] Insurance coverage support
-- [ ] Community features and forums
-- [ ] AI therapy sessions
+- [ ] Community features and moderated forums
+- [ ] Extended AI therapy sessions with structured CBT/DBT protocols
 - [ ] Medication tracking and reminders
+- [ ] Integration with electronic health records (EHR)
+- [ ] Predictive analytics for crisis prevention
 
 ---
 
