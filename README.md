@@ -1,6 +1,22 @@
-# MindCare - Mental Health Support Platform
+# 🧠 MindCare - Mental Health Support Platform
 
-A comprehensive mental health support application that combines professional assessment tools, AI-powered analysis, and 24/7 WhatsApp chatbot support to help users monitor and improve their mental wellness.
+> Comprehensive mental health assessment platform combining professional tools, AI analysis, and 24/7 WhatsApp support
+
+[![CI/CD Pipeline](https://github.com/Isaloum/empathibot/actions/workflows/ci.yml/badge.svg)](https://github.com/Isaloum/empathibot/actions)
+[![codecov](https://codecov.io/gh/Isaloum/empathibot/branch/main/graph/badge.svg)](https://codecov.io/gh/Isaloum/empathibot)
+[![Python](https://img.shields.io/badge/Python-3.9%2B-blue.svg)](https://python.org)
+[![Flask](https://img.shields.io/badge/Flask-3.1.0-green.svg)](https://flask.palletsprojects.com/)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+## ⚡ Quick Stats
+
+
+✅ PHQ-9 + GAD-7 Assessments 🤖 AI-Powered Analysis
+💬 24/7 WhatsApp Support 🔒 HIPAA-Compliant Design
+📊 Interactive Dashboard 🆘 Crisis Detection
+
+
+---
 
 ## 🌟 Features
 
