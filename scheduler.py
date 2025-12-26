@@ -4,7 +4,7 @@ Handles scheduled wellness check-ins and follow-ups
 """
 
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import List, Dict
 from firebase_admin import firestore
 from twilio.rest import Client
@@ -233,14 +233,21 @@ I'm here if you want to talk about anything."""
 
         # Get recent alerts
         recent_alerts = []
-        for alert_doc in alerts_ref.stream():
+        now = datetime.now(timezone.utc)
+        window_start = now - timedelta(hours=24)
+        window_end = now - timedelta(hours=4)
+        alerts_query = (
+            alerts_ref.where('timestamp', '>=', window_start)
+            .where('timestamp', '<=', window_end)
+        )
+        for alert_doc in alerts_query.stream():
             alert_data = alert_doc.to_dict()
 
             # Check if timestamp is within last 24 hours
             timestamp = alert_data.get('timestamp')
             if hasattr(timestamp, 'timestamp'):
-                alert_time = datetime.fromtimestamp(timestamp.timestamp())
-                time_since = datetime.now() - alert_time
+                alert_time = datetime.fromtimestamp(timestamp.timestamp(), tz=timezone.utc)
+                time_since = now - alert_time
 
                 if time_since < timedelta(hours=24) and time_since > timedelta(hours=4):
                     # Check if follow-up already sent
