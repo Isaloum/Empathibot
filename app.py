@@ -24,7 +24,15 @@ load_dotenv()
 
 # Firebase setup
 firebase_json = os.getenv("FIREBASE_CONFIG_JSON")
-cred = credentials.Certificate(json.loads(firebase_json))
+if not firebase_json:
+    raise RuntimeError("FIREBASE_CONFIG_JSON is required to start the application.")
+
+try:
+    firebase_config = json.loads(firebase_json)
+except json.JSONDecodeError as exc:
+    raise RuntimeError("FIREBASE_CONFIG_JSON must be valid JSON.") from exc
+
+cred = credentials.Certificate(firebase_config)
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 
@@ -33,7 +41,9 @@ llm = OpenAI(temperature=0.7, max_tokens=250)
 
 app = Flask(__name__)
 CORS(app)
-app.secret_key = os.getenv('SECRET_KEY', 'your-secret-key-here')
+app.secret_key = os.getenv('SECRET_KEY')
+if not app.secret_key:
+    raise RuntimeError("SECRET_KEY is required to start the application.")
 
 # Rate limiting for security
 limiter = Limiter(
@@ -144,8 +154,9 @@ empathibot = Empathibot(db=db, llm=llm)
 # Initialize automated check-in scheduler
 scheduler = CheckInScheduler(db=db, empathibot=empathibot)
 
-# Start the scheduler in background (optional - uncomment to enable)
-# scheduler.start_scheduler()
+# Start the scheduler in background if explicitly enabled
+if os.getenv("ENABLE_SCHEDULER", "false").lower() in {"1", "true", "yes"}:
+    scheduler.start_scheduler()
 
 # Web Interface Routes
 @app.route("/")
