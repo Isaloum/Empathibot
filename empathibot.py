@@ -16,7 +16,7 @@ from typing import Dict, List, Optional, Tuple
 from langchain_community.llms import OpenAI
 from langchain.prompts import PromptTemplate
 from langchain.memory import ConversationBufferWindowMemory
-from langchain.chains import ConversationChain
+from langchain.chains import LLMChain
 import langdetect
 from firebase_admin import firestore
 
@@ -387,7 +387,7 @@ class Empathibot:
 
         # Enhanced prompt template for empathetic responses
         self.prompt_template = PromptTemplate(
-            input_variables=["history", "input", "context"],
+            input_variables=["history", "input"],
             template="""You are Empathibot, a compassionate and empathetic AI mental health support companion. Your role is to:
 
 1. Listen actively and validate feelings
@@ -395,8 +395,6 @@ class Empathibot:
 3. Suggest healthy coping strategies
 4. Recognize when professional help is needed
 5. Be warm, non-judgmental, and supportive
-
-Conversation Context: {context}
 
 Previous conversation:
 {history}
@@ -482,7 +480,7 @@ Your empathetic response:"""
         context = " | ".join(context_parts) if context_parts else "New conversation"
 
         # 7. Generate empathetic response using LangChain
-        conversation_chain = ConversationChain(
+        conversation_chain = LLMChain(
             llm=self.llm,
             memory=memory.memory,
             prompt=self.prompt_template,
@@ -490,7 +488,8 @@ Your empathetic response:"""
         )
 
         # Generate response
-        ai_response = conversation_chain.predict(input=message, context=context)
+        combined_input = f"Context: {context}\n\nUser message: {message}"
+        ai_response = conversation_chain.predict(input=combined_input)
 
         # 8. Post-process response
         # Add crisis resources if moderate severity detected
