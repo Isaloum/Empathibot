@@ -12,7 +12,7 @@
 
 
 ✅ PHQ-9 + GAD-7 Assessments 🤖 AI-Powered Analysis
-💬 24/7 WhatsApp Support 🔒 HIPAA-Compliant Design
+💬 24/7 WhatsApp Support 🔒 Privacy-Focused Design
 📊 Interactive Dashboard 🆘 Crisis Detection
 
 
@@ -50,7 +50,7 @@
 
 ### 🔒 Security & Privacy
 - **Data Encryption**: All sensitive data is encrypted and secure
-- **HIPAA Compliance**: Following healthcare privacy standards
+- **Privacy-Focused Design**: Built with healthcare privacy standards in mind
 - **Rate Limiting**: Protection against abuse and spam
 - **Secure Authentication**: User data protection with session management
 
@@ -86,6 +86,7 @@
    
    # Flask Configuration
    SECRET_KEY=your_secret_key_here
+   ENABLE_SCHEDULER=false
    
    # Twilio Configuration (for WhatsApp)
    TWILIO_ACCOUNT_SID=your_twilio_account_sid

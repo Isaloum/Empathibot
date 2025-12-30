@@ -16,7 +16,7 @@ from typing import Dict, List, Optional, Tuple
 from langchain_community.llms import OpenAI
 from langchain.prompts import PromptTemplate
 from langchain.memory import ConversationBufferWindowMemory
-from langchain.chains import ConversationChain
+from langchain.chains import LLMChain
 import langdetect
 from firebase_admin import firestore
 
@@ -29,21 +29,27 @@ class CrisisDetector:
         self.critical_keywords = [
             'suicide', 'kill myself', 'end my life', 'want to die', 'better off dead',
             'suicide plan', 'overdose', 'jump off', 'hang myself', 'shoot myself',
-            'cut myself', 'hurt myself badly', 'end it all', 'no reason to live'
+            'cut myself', 'hurt myself badly', 'end it all', 'no reason to live',
+            'suicidio', 'quiero morir', 'me quiero morir', 'me quiero matar',
+            'je veux mourir', 'me suicider', 'je veux me tuer'
         ]
 
         # High severity keywords
         self.high_severity_keywords = [
             'self harm', 'cut', 'cutting', 'harm myself', 'hurt myself',
             'hopeless', 'worthless', 'nothing matters', 'give up', 'can\'t go on',
-            'everyone would be better', 'burden to everyone', 'life is meaningless'
+            'everyone would be better', 'burden to everyone', 'life is meaningless',
+            'autolesion', 'desesperado', 'sin esperanza', 'no puedo mas',
+            'sans espoir', 'je ne peux plus', 'tout est inutile'
         ]
 
         # Moderate severity keywords
         self.moderate_keywords = [
             'depressed', 'anxious', 'panic attack', 'can\'t cope', 'overwhelmed',
             'breaking down', 'losing it', 'can\'t handle', 'falling apart',
-            'hate myself', 'failure', 'disaster', 'terrible', 'awful day'
+            'hate myself', 'failure', 'disaster', 'terrible', 'awful day',
+            'deprimido', 'ansioso', 'ataque de panico', 'no puedo manejar',
+            'deprime', 'anxieux', 'attaque de panique', 'submerge'
         ]
 
         # Positive/coping keywords (reduce severity)
@@ -51,6 +57,26 @@ class CrisisDetector:
             'better', 'improving', 'hopeful', 'trying', 'grateful', 'thankful',
             'getting help', 'therapy', 'counselor', 'support', 'family', 'friends'
         ]
+
+        self.negation_words = {
+            'not', "don't", 'dont', 'never', 'no', 'without', "isn't", 'isnt',
+            "can't", 'cant', "won't", 'wont', "didn't", 'didnt', "doesn't", 'doesnt',
+            "wasn't", 'wasnt', "aren't", 'arent'
+        }
+
+    def _keyword_pattern(self, keyword: str) -> re.Pattern:
+        parts = [re.escape(part) for part in keyword.split()]
+        pattern = r"\b" + r"\s+".join(parts) + r"\b"
+        return re.compile(pattern)
+
+    def _is_negated(self, text_lower: str, match_start: int) -> bool:
+        words = [
+            (match.group(0), match.start(), match.end())
+            for match in re.finditer(r"[a-z']+", text_lower)
+        ]
+        preceding_words = [word for word, _, end in words if end <= match_start]
+        window = preceding_words[-3:]
+        return any(word in self.negation_words for word in window)
 
     def detect_crisis(self, text: str) -> Dict:
         """
@@ -65,21 +91,27 @@ class CrisisDetector:
 
         # Check critical keywords (score: 100 each)
         for keyword in self.critical_keywords:
-            if keyword in text_lower:
-                severity_score += 100
-                matched_keywords.append(keyword)
+            pattern = self._keyword_pattern(keyword)
+            for match in pattern.finditer(text_lower):
+                if not self._is_negated(text_lower, match.start()):
+                    severity_score += 100
+                    matched_keywords.append(keyword)
 
         # Check high severity keywords (score: 50 each)
         for keyword in self.high_severity_keywords:
-            if keyword in text_lower:
-                severity_score += 50
-                matched_keywords.append(keyword)
+            pattern = self._keyword_pattern(keyword)
+            for match in pattern.finditer(text_lower):
+                if not self._is_negated(text_lower, match.start()):
+                    severity_score += 50
+                    matched_keywords.append(keyword)
 
         # Check moderate keywords (score: 20 each)
         for keyword in self.moderate_keywords:
-            if keyword in text_lower:
-                severity_score += 20
-                matched_keywords.append(keyword)
+            pattern = self._keyword_pattern(keyword)
+            for match in pattern.finditer(text_lower):
+                if not self._is_negated(text_lower, match.start()):
+                    severity_score += 20
+                    matched_keywords.append(keyword)
 
         # Reduce score for positive keywords (score: -10 each)
         for keyword in self.positive_keywords:
@@ -205,9 +237,10 @@ class LanguageHandler:
 class UserSessionManager:
     """Manage user sessions, conversation history, and profiles"""
 
-    def __init__(self, db):
+    def __init__(self, db, max_history: int = 50):
         self.db = db
         self.sessions = {}  # In-memory session cache
+        self.max_history = max_history
 
     def get_or_create_user(self, phone_number: str) -> Dict:
         """Get existing user or create new user profile"""
@@ -294,6 +327,28 @@ class UserSessionManager:
             'language': language,
             'timestamp': firestore.SERVER_TIMESTAMP
         })
+        self._trim_conversation_history(user_id)
+
+    def _trim_conversation_history(self, user_id: str):
+        """Keep only the most recent messages for a user."""
+        messages_ref = self.db.collection('whatsapp_messages')
+        recent_query = (
+            messages_ref.where('user_id', '==', user_id)
+            .order_by('timestamp', direction=firestore.Query.DESCENDING)
+            .limit(self.max_history)
+        )
+        recent_docs = list(recent_query.stream())
+        if len(recent_docs) < self.max_history:
+            return
+
+        last_doc = recent_docs[-1]
+        old_query = (
+            messages_ref.where('user_id', '==', user_id)
+            .order_by('timestamp', direction=firestore.Query.DESCENDING)
+            .start_after(last_doc)
+        )
+        for old_doc in old_query.stream():
+            old_doc.reference.delete()
 
 
 class ConversationMemory:
@@ -332,7 +387,7 @@ class Empathibot:
 
         # Enhanced prompt template for empathetic responses
         self.prompt_template = PromptTemplate(
-            input_variables=["history", "input", "context"],
+            input_variables=["history", "input"],
             template="""You are Empathibot, a compassionate and empathetic AI mental health support companion. Your role is to:
 
 1. Listen actively and validate feelings
@@ -340,8 +395,6 @@ class Empathibot:
 3. Suggest healthy coping strategies
 4. Recognize when professional help is needed
 5. Be warm, non-judgmental, and supportive
-
-Conversation Context: {context}
 
 Previous conversation:
 {history}
@@ -427,7 +480,7 @@ Your empathetic response:"""
         context = " | ".join(context_parts) if context_parts else "New conversation"
 
         # 7. Generate empathetic response using LangChain
-        conversation_chain = ConversationChain(
+        conversation_chain = LLMChain(
             llm=self.llm,
             memory=memory.memory,
             prompt=self.prompt_template,
@@ -435,7 +488,8 @@ Your empathetic response:"""
         )
 
         # Generate response
-        ai_response = conversation_chain.predict(input=message, context=context)
+        combined_input = f"Context: {context}\n\nUser message: {message}"
+        ai_response = conversation_chain.predict(input=combined_input)
 
         # 8. Post-process response
         # Add crisis resources if moderate severity detected
@@ -487,8 +541,12 @@ Your empathetic response:"""
         }
 
         # Keep last 30 mood entries
+        user_data = user_ref.get().to_dict() or {}
+        mood_trend = user_data.get('mental_health_data', {}).get('mood_trend', [])
+        mood_trend.append(mood_entry)
+        trimmed_trend = mood_trend[-30:]
         user_ref.update({
-            'mental_health_data.mood_trend': firestore.ArrayUnion([mood_entry])
+            'mental_health_data.mood_trend': trimmed_trend
         })
 
     def send_check_in(self, user_id: str) -> str:

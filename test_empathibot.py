@@ -11,6 +11,8 @@ import os
 # Add parent directory to path for imports
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
+from langchain_core.language_models.fake import FakeListLLM
+
 from empathibot import (
     CrisisDetector,
     LanguageHandler,
@@ -265,10 +267,9 @@ class TestEmpathibot(unittest.TestCase):
     def setUp(self):
         # Mock database and LLM
         self.mock_db = Mock()
-        self.mock_llm = Mock()
-
-        # Mock LLM response
-        self.mock_llm.invoke.return_value = "I'm here to support you. How can I help?"
+        self.mock_llm = FakeListLLM(
+            responses=["I'm here to support you. How can I help?"]
+        )
 
         self.empathibot = Empathibot(db=self.mock_db, llm=self.mock_llm)
 
@@ -316,6 +317,7 @@ class TestEmpathibot(unittest.TestCase):
 
         # Mock Firestore collection for messages
         mock_collection = Mock()
+        mock_collection.document.return_value.get.return_value.to_dict.return_value = {}
         self.mock_db.collection.return_value = mock_collection
 
         # Process message
@@ -347,6 +349,7 @@ class TestEmpathibot(unittest.TestCase):
 
         # Mock Firestore collections
         mock_collection = Mock()
+        mock_collection.document.return_value.get.return_value.to_dict.return_value = {}
         self.mock_db.collection.return_value = mock_collection
 
         # Process message
@@ -415,8 +418,13 @@ class TestIntegration(unittest.TestCase):
 
     def setUp(self):
         self.mock_db = Mock()
-        self.mock_llm = Mock()
-        self.mock_llm.invoke.return_value = "I understand you're going through a difficult time."
+        self.mock_llm = FakeListLLM(
+            responses=[
+                "I understand you're going through a difficult time.",
+                "That sounds really hard. I'm here with you.",
+                "I'm glad you reached out. How can I support you next?"
+            ]
+        )
 
     @patch.object(UserSessionManager, 'get_or_create_user')
     @patch.object(UserSessionManager, 'get_conversation_history')
@@ -439,6 +447,7 @@ class TestIntegration(unittest.TestCase):
         mock_history.return_value = []
 
         mock_collection = Mock()
+        mock_collection.document.return_value.get.return_value.to_dict.return_value = {}
         self.mock_db.collection.return_value = mock_collection
 
         # Simulate conversation
